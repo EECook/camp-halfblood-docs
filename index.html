@@ -3,22 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Camp Half-Blood Bot Documentation</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+    <title>Camp Half-Blood | Where Demigods Become Heroes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
             --gold: #D4AF37;
             --gold-light: #F4E4A1;
             --gold-dark: #8B7355;
+            --gold-glow: rgba(212, 175, 55, 0.6);
             --bronze: #CD7F32;
-            --olympus-blue: #1a1a2e;
-            --olympus-purple: #16213e;
+            --olympus-blue: #0a0a1a;
+            --olympus-purple: #12122a;
+            --deep-night: #050510;
             --lightning: #4fc3f7;
+            --lightning-glow: rgba(79, 195, 247, 0.5);
             --fire-orange: #ff6b35;
             --sea-green: #20B2AA;
-            --underworld: #2d1b1b;
+            --underworld: #1a0f0f;
             --marble: #f5f5f0;
             --marble-dark: #e8e8e0;
+            --parchment: #f4e4c1;
             --text-dark: #1a1a1a;
             --text-light: #f5f5f0;
             --success: #4ade80;
@@ -32,60 +36,579 @@
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             font-family: 'Crimson Text', Georgia, serif;
-            background: linear-gradient(135deg, var(--olympus-blue) 0%, var(--olympus-purple) 50%, #0f0f23 100%);
+            background: var(--deep-night);
             color: var(--text-light);
             min-height: 100vh;
             line-height: 1.7;
             font-size: 18px;
+            overflow-x: hidden;
         }
 
-        /* Header */
-        header {
-            background: linear-gradient(180deg, rgba(212, 175, 55, 0.15) 0%, transparent 100%);
-            border-bottom: 2px solid var(--gold);
-            padding: 2rem;
-            text-align: center;
-            position: relative;
+        /* ══════════════════════════════════════════════════════════════════════════
+           STARFIELD & PARTICLE EFFECTS
+        ══════════════════════════════════════════════════════════════════════════ */
+        
+        #starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
             overflow: hidden;
         }
 
-        header::before {
-            content: "⚡";
+        .star {
             position: absolute;
-            font-size: 200px;
-            opacity: 0.03;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration) ease-in-out infinite;
+            opacity: 0;
         }
 
-        .logo {
-            font-family: 'Cinzel', serif;
-            font-size: 3rem;
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .shooting-star {
+            position: absolute;
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), transparent);
+            animation: shoot 3s linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes shoot {
+            0% { transform: translateX(-100px) translateY(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateX(calc(100vw + 100px)) translateY(200px); opacity: 0; }
+        }
+
+        /* Floating golden particles */
+        .particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: var(--gold);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+            animation: float-particle 8s ease-in-out infinite;
+            box-shadow: 0 0 10px var(--gold-glow);
+        }
+
+        @keyframes float-particle {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+
+        /* ══════════════════════════════════════════════════════════════════════════
+           LANDING PAGE - THE GRAND ENTRANCE
+        ══════════════════════════════════════════════════════════════════════════ */
+        
+        #landing {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 2rem;
+            background: 
+                radial-gradient(ellipse at 50% 0%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 20% 80%, rgba(79, 195, 247, 0.05) 0%, transparent 40%),
+                radial-gradient(ellipse at 80% 70%, rgba(205, 127, 50, 0.05) 0%, transparent 40%),
+                linear-gradient(180deg, var(--deep-night) 0%, var(--olympus-blue) 50%, var(--olympus-purple) 100%);
+        }
+
+        .landing-content {
+            text-align: center;
+            z-index: 10;
+            max-width: 900px;
+            animation: fadeInUp 1.5s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .greek-border {
+            width: 200px;
+            height: 30px;
+            margin: 0 auto 2rem;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20'%3E%3Cpath d='M0 10 L10 10 L10 0 L20 0 L20 10 L30 10 L30 0 L40 0 L40 10 L50 10 L50 0 L60 0 L60 10 L70 10 L70 0 L80 0 L80 10 L90 10 L90 0 L100 0 L100 10 L100 20 L90 20 L90 10 L80 10 L80 20 L70 20 L70 10 L60 10 L60 20 L50 20 L50 10 L40 10 L40 20 L30 20 L30 10 L20 10 L20 20 L10 20 L10 10 L0 10 Z' fill='%23D4AF37' fill-opacity='0.3'/%3E%3C/svg%3E") repeat-x center;
+            opacity: 0.6;
+            animation: fadeIn 2s ease-out 0.5s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 0.6; }
+        }
+
+        .lightning-icon {
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 1rem;
+            animation: glow-pulse 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px var(--gold-glow));
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% { filter: drop-shadow(0 0 20px var(--gold-glow)); }
+            50% { filter: drop-shadow(0 0 40px var(--gold)) drop-shadow(0 0 60px var(--gold-glow)); }
+        }
+
+        .main-title {
+            font-family: 'Cinzel Decorative', 'Cinzel', serif;
+            font-size: clamp(2.5rem, 8vw, 5rem);
             font-weight: 700;
             color: var(--gold);
-            text-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+            text-shadow: 
+                0 0 40px var(--gold-glow),
+                0 4px 8px rgba(0,0,0,0.5);
+            letter-spacing: 0.1em;
             margin-bottom: 0.5rem;
-            letter-spacing: 3px;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            color: var(--gold-light);
+            opacity: 0.9;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            animation: fadeIn 2s ease-out 0.8s both;
         }
 
         .tagline {
+            font-family: 'Crimson Text', serif;
+            font-size: clamp(1.1rem, 2.5vw, 1.4rem);
             font-style: italic;
-            color: var(--gold-light);
-            font-size: 1.2rem;
-            opacity: 0.9;
+            color: var(--marble);
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            line-height: 1.8;
+            animation: fadeIn 2s ease-out 1s both;
         }
 
-        /* Navigation */
-        nav {
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(10px);
-            position: sticky;
+        .tagline strong {
+            color: var(--gold);
+        }
+
+        .enter-btn {
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 1rem 3rem;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--bronze) 100%);
+            color: var(--olympus-blue);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            box-shadow: 
+                0 4px 20px rgba(212, 175, 55, 0.4),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+            animation: fadeIn 2s ease-out 1.2s both;
+        }
+
+        .enter-btn::before {
+            content: '';
+            position: absolute;
             top: 0;
-            z-index: 100;
-            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .enter-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 30px rgba(212, 175, 55, 0.6),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+
+        .enter-btn:hover::before {
+            left: 100%;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite, fadeIn 2s ease-out 1.5s both;
+        }
+
+        .scroll-indicator span {
+            display: block;
+            width: 24px;
+            height: 24px;
+            border-right: 2px solid var(--gold);
+            border-bottom: 2px solid var(--gold);
+            transform: rotate(45deg);
+            opacity: 0.6;
+            animation: scroll-fade 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        @keyframes scroll-fade {
+            0% { opacity: 0.2; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.2; }
+        }
+
+        /* ══════════════════════════════════════════════════════════════════════════
+           THE WELCOME SCROLL SECTION
+        ══════════════════════════════════════════════════════════════════════════ */
+        
+        #welcome {
+            min-height: 100vh;
+            padding: 6rem 2rem;
+            background: 
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='1' fill='%23D4AF37' fill-opacity='0.03'/%3E%3C/svg%3E") repeat,
+                linear-gradient(180deg, var(--olympus-purple) 0%, var(--olympus-blue) 50%, var(--deep-night) 100%);
+            position: relative;
+        }
+
+        .welcome-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .scroll-reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .parchment-box {
+            background: 
+                linear-gradient(135deg, rgba(244, 228, 193, 0.08) 0%, rgba(244, 228, 193, 0.02) 100%);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 8px;
+            padding: 3rem;
+            position: relative;
+            margin-bottom: 4rem;
+        }
+
+        .parchment-box::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 20%;
+            right: 20%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        .section-title {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            color: var(--gold);
+            text-align: center;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 30px var(--gold-glow);
+        }
+
+        .section-title .emoji {
+            display: block;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .story-text {
+            font-size: 1.15rem;
+            line-height: 2;
+            color: var(--marble);
+            text-align: center;
+            max-width: 750px;
+            margin: 0 auto;
+        }
+
+        .story-text em {
+            color: var(--gold-light);
+            font-style: italic;
+        }
+
+        /* ══════════════════════════════════════════════════════════════════════════
+           THE THREE REALMS - Discord, Minecraft, Web Portal
+        ══════════════════════════════════════════════════════════════════════════ */
+        
+        .realms-section {
+            padding: 4rem 0;
+        }
+
+        .realms-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            color: var(--gold-light);
+            text-align: center;
+            margin-bottom: 3rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .realms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .realm-card {
+            background: linear-gradient(145deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 100%);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 12px;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .realm-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--realm-color, var(--gold)), transparent);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .realm-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--realm-color, var(--gold));
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .realm-card:hover::before {
+            opacity: 1;
+        }
+
+        .realm-card.discord { --realm-color: #5865F2; }
+        .realm-card.minecraft { --realm-color: #5D8C3E; }
+        .realm-card.portal { --realm-color: var(--lightning); }
+
+        .realm-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .realm-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.4rem;
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .realm-desc {
+            color: var(--marble-dark);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        .realm-features {
+            margin-top: 1.5rem;
+            text-align: left;
+        }
+
+        .realm-features li {
+            color: var(--marble);
+            padding: 0.4rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            list-style: none;
+            font-size: 0.95rem;
+        }
+
+        .realm-features li::before {
+            content: '✦';
+            position: absolute;
+            left: 0;
+            color: var(--gold);
+            font-size: 0.8rem;
+        }
+
+        /* ══════════════════════════════════════════════════════════════════════════
+           YOUR JOURNEY BEGINS - Onboarding Steps
+        ══════════════════════════════════════════════════════════════════════════ */
+        
+        #journey {
+            min-height: 100vh;
+            padding: 6rem 2rem;
+            background: 
+                radial-gradient(ellipse at 30% 20%, rgba(79, 195, 247, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(212, 175, 55, 0.05) 0%, transparent 50%),
+                linear-gradient(180deg, var(--deep-night) 0%, var(--olympus-blue) 100%);
+            position: relative;
+        }
+
+        .journey-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .journey-intro {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .journey-intro h2 {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: clamp(2rem, 5vw, 3rem);
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .journey-intro p {
+            font-size: 1.2rem;
+            color: var(--marble);
+            font-style: italic;
+        }
+
+        .journey-path {
+            position: relative;
+            padding-left: 60px;
+        }
+
+        .journey-path::before {
+            content: '';
+            position: absolute;
+            left: 24px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--gold), var(--gold-dark), transparent);
+        }
+
+        .journey-step {
+            position: relative;
+            margin-bottom: 3rem;
+            opacity: 0;
+            transform: translateX(-30px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .journey-step.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .step-number {
+            position: absolute;
+            left: -60px;
+            top: 0;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--bronze) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: var(--olympus-blue);
+            box-shadow: 0 4px 20px var(--gold-glow);
+        }
+
+        .step-content {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .step-content:hover {
+            border-color: var(--gold);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+
+        .step-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.3rem;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .step-desc {
+            color: var(--marble);
+            line-height: 1.7;
+        }
+
+        .step-command {
+            display: inline-block;
+            background: rgba(79, 195, 247, 0.15);
+            color: var(--lightning);
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-family: 'Source Code Pro', monospace;
+            font-size: 0.9rem;
+            margin: 0.3rem 0.2rem;
+        }
+
+        /* ══════════════════════════════════════════════════════════════════════════
+           NAVIGATION - Magical Floating Nav
+        ══════════════════════════════════════════════════════════════════════════ */
+        
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(10, 10, 26, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            transform: translateY(-100%);
+            transition: transform 0.4s ease;
+        }
+
+        nav.visible {
+            transform: translateY(0);
         }
 
         .nav-container {
@@ -140,11 +663,30 @@
             box-shadow: 0 0 20px rgba(79, 195, 247, 0.4);
         }
 
-        /* Main Content */
+        .nav-brand {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 1.2rem;
+            color: var(--gold);
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* ══════════════════════════════════════════════════════════════════════════
+           MAIN DOCUMENTATION CONTENT
+        ══════════════════════════════════════════════════════════════════════════ */
+        
         main {
             max-width: 1200px;
             margin: 0 auto;
             padding: 2rem;
+            display: none;
+        }
+
+        main.active {
+            display: block;
         }
 
         .tab-content {
@@ -154,11 +696,6 @@
 
         .tab-content.active {
             display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Section Styling */
@@ -171,7 +708,7 @@
             backdrop-filter: blur(5px);
         }
 
-        .section-title {
+        .section-header {
             font-family: 'Cinzel', serif;
             font-size: 1.8rem;
             color: var(--gold);
@@ -183,7 +720,7 @@
             padding-bottom: 0.75rem;
         }
 
-        .section-title .emoji {
+        .section-header .emoji {
             font-size: 1.5rem;
         }
 
@@ -383,7 +920,7 @@
             font-size: 1.1rem;
         }
 
-        .step-title {
+        .step-title-doc {
             font-family: 'Cinzel', serif;
             color: var(--gold-light);
             font-size: 1.15rem;
@@ -457,21 +994,105 @@
         /* Footer */
         footer {
             text-align: center;
-            padding: 2rem;
+            padding: 3rem 2rem;
             margin-top: 2rem;
             border-top: 1px solid rgba(212, 175, 55, 0.2);
             color: var(--gold-dark);
+            background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.3) 100%);
         }
 
-        footer a {
+        footer p {
+            color: var(--gold-dark);
+            margin: 0.5rem 0;
+        }
+
+        .footer-brand {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 1.5rem;
             color: var(--gold);
-            text-decoration: none;
+            margin-bottom: 1rem;
         }
 
-        /* Responsive */
+        /* ══════════════════════════════════════════════════════════════════════════
+           CALL TO ACTION SECTION
+        ══════════════════════════════════════════════════════════════════════════ */
+        
+        #cta {
+            padding: 6rem 2rem;
+            text-align: center;
+            background: 
+                radial-gradient(ellipse at 50% 100%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+                linear-gradient(180deg, var(--olympus-blue) 0%, var(--olympus-purple) 100%);
+        }
+
+        .cta-box {
+            max-width: 700px;
+            margin: 0 auto;
+            background: linear-gradient(145deg, rgba(212, 175, 55, 0.1) 0%, rgba(0,0,0,0.4) 100%);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 16px;
+            padding: 3rem;
+        }
+
+        .cta-box h2 {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 2rem;
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .cta-box p {
+            font-size: 1.1rem;
+            color: var(--marble);
+            margin-bottom: 2rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .cta-btn {
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 0.9rem 2rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            letter-spacing: 0.1em;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .cta-btn.primary {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--bronze) 100%);
+            color: var(--olympus-blue);
+        }
+
+        .cta-btn.secondary {
+            background: transparent;
+            border: 2px solid var(--gold);
+            color: var(--gold);
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+        }
+
+        /* ══════════════════════════════════════════════════════════════════════════
+           RESPONSIVE
+        ══════════════════════════════════════════════════════════════════════════ */
+        
         @media (max-width: 768px) {
-            .logo {
-                font-size: 2rem;
+            .main-title {
+                font-size: 2.5rem;
             }
             
             .nav-btn {
@@ -487,8 +1108,27 @@
                 padding: 1.25rem;
             }
             
-            .section-title {
-                font-size: 1.4rem;
+            .parchment-box {
+                padding: 2rem 1.5rem;
+            }
+
+            .journey-path {
+                padding-left: 50px;
+            }
+
+            .journey-path::before {
+                left: 19px;
+            }
+
+            .step-number {
+                left: -50px;
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+
+            .realms-grid {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -509,16 +1149,31 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--gold);
         }
+
+        /* Utility */
+        .hidden {
+            display: none !important;
+        }
+
+        .grecian-divider {
+            width: 100%;
+            height: 20px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20'%3E%3Cpath d='M0 10 L15 10 L15 5 L25 5 L25 15 L35 15 L35 5 L45 5 L45 10 L55 10 L55 5 L65 5 L65 15 L75 15 L75 5 L85 5 L85 10 L100 10 L100 10 L115 10 L115 5 L125 5 L125 15 L135 15 L135 5 L145 5 L145 10 L155 10 L155 5 L165 5 L165 15 L175 15 L175 5 L185 5 L185 10 L200 10' stroke='%23D4AF37' stroke-width='1' fill='none' opacity='0.4'/%3E%3C/svg%3E") repeat-x center;
+            margin: 3rem 0;
+        }
     </style>
 </head>
 <body>
-    <header>
-        <h1 class="logo">⚡ Camp Half-Blood ⚡</h1>
-        <p class="tagline">Discord & Minecraft Bot Documentation</p>
-    </header>
+    <!-- STARFIELD BACKGROUND -->
+    <div id="starfield"></div>
 
-    <nav>
+    <!-- FLOATING PARTICLES -->
+    <div id="particles"></div>
+
+    <!-- NAVIGATION (hidden initially, appears on scroll) -->
+    <nav id="main-nav">
         <div class="nav-container">
+            <div class="nav-brand" onclick="showLanding()">⚡ Camp Half-Blood</div>
             <button class="nav-btn active" data-tab="getting-started"><span class="emoji">🏕️</span>Getting Started</button>
             <button class="nav-btn" data-tab="profile"><span class="emoji">👤</span>Profile & Mail</button>
             <button class="nav-btn" data-tab="economy"><span class="emoji">💰</span>Economy</button>
@@ -532,11 +1187,199 @@
         </div>
     </nav>
 
-    <main>
+    <!-- LANDING PAGE -->
+    <section id="landing">
+        <div class="landing-content">
+            <div class="greek-border"></div>
+            <span class="lightning-icon">⚡</span>
+            <h1 class="main-title">Camp Half-Blood</h1>
+            <p class="subtitle">Where Demigods Become Heroes</p>
+            <p class="tagline">
+                A world where <em>Discord</em> meets <em>Minecraft</em>, where ancient mythology comes alive, 
+                and where <strong>your story</strong> is waiting to be written. 
+                Discover your divine heritage. Forge your legend.
+            </p>
+            <button class="enter-btn" onclick="enterCamp()">Enter the Camp</button>
+        </div>
+        <div class="scroll-indicator">
+            <span></span>
+        </div>
+    </section>
+
+    <!-- WELCOME SECTION -->
+    <section id="welcome">
+        <div class="welcome-container">
+            <div class="parchment-box scroll-reveal">
+                <h2 class="section-title">
+                    <span class="emoji">📜</span>
+                    The Prophecy Awaits
+                </h2>
+                <p class="story-text">
+                    You've always felt different. Strange things happen around you. 
+                    Lightning flickers when you're angry. The sea seems to call your name. 
+                    Shadows whisper secrets only you can hear.
+                    <br><br>
+                    <em>There's a reason for that.</em>
+                    <br><br>
+                    You are a <strong>demigod</strong> — half mortal, half divine. 
+                    One of your parents is an Olympian god, and now it's time to discover which one.
+                    Welcome to <strong>Camp Half-Blood</strong>, the only safe haven for heroes like you.
+                </p>
+            </div>
+
+            <div class="realms-section scroll-reveal">
+                <h3 class="realms-title">Three Realms, One Legend</h3>
+                <div class="realms-grid">
+                    <div class="realm-card discord">
+                        <span class="realm-icon">💬</span>
+                        <h4 class="realm-title">Discord Realm</h4>
+                        <p class="realm-desc">Your social hub for all things camp. Chat, roleplay, and manage your demigod life.</p>
+                        <ul class="realm-features">
+                            <li>Interactive claiming ceremony</li>
+                            <li>10 mythology mini-games</li>
+                            <li>Cabin teams & Divine Favor</li>
+                            <li>Mail system & player shops</li>
+                            <li>Quest board & events</li>
+                        </ul>
+                    </div>
+                    <div class="realm-card minecraft">
+                        <span class="realm-icon">⛏️</span>
+                        <h4 class="realm-title">Minecraft Realm</h4>
+                        <p class="realm-desc">Build, battle, and explore in a world synced with your Discord profile.</p>
+                        <ul class="realm-features">
+                            <li>Two-way Drachma sync</li>
+                            <li>Item delivery from Discord shop</li>
+                            <li>In-game profile & leaderboards</li>
+                            <li>Physical Drachma currency</li>
+                            <li>Player shop fulfillment</li>
+                        </ul>
+                    </div>
+                    <div class="realm-card portal">
+                        <span class="realm-icon">🌐</span>
+                        <h4 class="realm-title">Web Portal</h4>
+                        <p class="realm-desc">Access your profile from anywhere — stats, mail, and camp history at your fingertips.</p>
+                        <ul class="realm-features">
+                            <li>View your complete profile</li>
+                            <li>Check mail & inventory</li>
+                            <li>Browse camp timeline</li>
+                            <li>Leaderboard rankings</li>
+                            <li>Coming soon: More features!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grecian-divider scroll-reveal"></div>
+
+            <div class="parchment-box scroll-reveal">
+                <h2 class="section-title">
+                    <span class="emoji">🔗</span>
+                    Bridging Two Worlds
+                </h2>
+                <p class="story-text">
+                    What makes Camp Half-Blood unique is the <strong>seamless connection</strong> between Discord and Minecraft.
+                    <br><br>
+                    Earn <em>golden Drachma</em> playing games on Discord, then spend it on powerful Minecraft items 
+                    that appear in your inventory. Run a player shop that delivers real items to buyers. 
+                    Your profile, your cabin, your legend — it all travels with you.
+                    <br><br>
+                    And this very website? Soon it will be fully integrated into the database, 
+                    letting you manage your demigod life from anywhere in the mortal world.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- JOURNEY / ONBOARDING SECTION -->
+    <section id="journey">
+        <div class="journey-container">
+            <div class="journey-intro scroll-reveal">
+                <h2>⚔️ Your Journey Begins</h2>
+                <p>Follow these steps to become a true hero of Camp Half-Blood</p>
+            </div>
+
+            <div class="journey-path">
+                <div class="journey-step scroll-reveal">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4 class="step-title">📋 Create Your Profile</h4>
+                        <p class="step-desc">
+                            Type <span class="step-command">!profile</span> in Discord to create your demigod profile. 
+                            You'll start with <strong>100 Drachma</strong> and access to all camp features. 
+                            Your profile is your central hub — everything branches from here.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="journey-step scroll-reveal">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4 class="step-title">🏛️ Discover Your Divine Parent</h4>
+                        <p class="step-desc">
+                            Use <span class="step-command">!claim</span> to begin your claiming ceremony. 
+                            Take the Oracle's quiz to reveal which of the <strong>19 Olympian gods</strong> is your parent, 
+                            or choose manually if you prefer. You'll receive a personalized letter from your godly parent!
+                        </p>
+                    </div>
+                </div>
+
+                <div class="journey-step scroll-reveal">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4 class="step-title">⛏️ Link Your Minecraft Account</h4>
+                        <p class="step-desc">
+                            Connect your worlds with <span class="step-command">!mclink YourMinecraftName</span>. 
+                            This enables two-way Drachma sync, item delivery, and in-game profile access. 
+                            Your Minecraft and Discord identities become one.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="journey-step scroll-reveal">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4 class="step-title">🏕️ Join a Cabin</h4>
+                        <p class="step-desc">
+                            Use <span class="step-command">!cabin list</span> to see existing cabins, or 
+                            <span class="step-command">!cabin create CabinName</span> to found your own. 
+                            Cabins are teams that compete for <strong>Divine Favor</strong> — work together to earn bonuses and glory!
+                        </p>
+                    </div>
+                </div>
+
+                <div class="journey-step scroll-reveal">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h4 class="step-title">💰 Start Your Adventure</h4>
+                        <p class="step-desc">
+                            Type <span class="step-command">!games</span> to access 10 mythology-themed mini-games. 
+                            Participate in daily challenges, accept quests from the board, and join camp events. 
+                            Earn Drachma, build your legend, and become a hero of Camp Half-Blood!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CALL TO ACTION -->
+    <section id="cta">
+        <div class="cta-box scroll-reveal">
+            <h2>⚡ Ready to Begin?</h2>
+            <p>The gods are watching. Your destiny awaits. Dive into the full documentation below to master every aspect of camp life.</p>
+            <div class="cta-buttons">
+                <button class="cta-btn primary" onclick="showDocs()">📚 View Full Documentation</button>
+                <a href="http://169.155.120.58:26964/portal" class="cta-btn secondary">🌐 Player Portal</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN DOCUMENTATION -->
+    <main id="documentation">
         <!-- GETTING STARTED TAB -->
         <div id="getting-started" class="tab-content active">
             <div class="section">
-                <h2 class="section-title"><span class="emoji">🏕️</span>Welcome to Camp Half-Blood</h2>
+                <h2 class="section-header"><span class="emoji">🏕️</span>Welcome to Camp Half-Blood</h2>
                 <p>Welcome, demigod! This documentation will guide you through everything you need to know about the Camp Half-Blood bot system. Whether you're a new camper or a seasoned hero, you'll find everything here.</p>
                 
                 <div class="info-box tip">
@@ -547,30 +1390,30 @@
                 <h3>Your First Steps at Camp</h3>
                 <div class="steps">
                     <div class="step">
-                        <div class="step-title">Create Your Profile</div>
+                        <div class="step-title-doc">Create Your Profile</div>
                         <p>Use <code>!profile</code> to create your demigod profile. This will set you up with 100 starting Drachma and access to all camp features.</p>
                     </div>
                     <div class="step">
-                        <div class="step-title">Discover Your Godly Parent</div>
+                        <div class="step-title-doc">Discover Your Godly Parent</div>
                         <p>Use <code>!claim</code> or <code>!quiz</code> to take the claiming quiz. Answer questions to reveal which Olympian god is your parent, or choose manually if you prefer.</p>
                     </div>
                     <div class="step">
-                        <div class="step-title">Link Your Minecraft Account</div>
+                        <div class="step-title-doc">Link Your Minecraft Account</div>
                         <p>Use <code>!mclink YourMinecraftName</code> to connect your Discord and Minecraft accounts. This enables two-way Drachma sync and item delivery.</p>
                     </div>
                     <div class="step">
-                        <div class="step-title">Join or Create a Cabin</div>
+                        <div class="step-title-doc">Join or Create a Cabin</div>
                         <p>Use <code>!cabin list</code> to browse existing cabins, or <code>!cabin create CabinName</code> to create your own. Cabins are teams that compete for Divine Favor.</p>
                     </div>
                     <div class="step">
-                        <div class="step-title">Start Earning Drachma</div>
+                        <div class="step-title-doc">Start Earning Drachma</div>
                         <p>Play mini-games with <code>!games</code>, participate in daily challenges, complete quests, and join events to earn Drachma currency!</p>
                     </div>
                 </div>
             </div>
 
             <div class="section">
-                <h2 class="section-title"><span class="emoji">📋</span>Essential Commands Reference</h2>
+                <h2 class="section-header"><span class="emoji">📋</span>Essential Commands Reference</h2>
                 
                 <div class="feature-grid">
                     <div class="feature-card">
@@ -601,7 +1444,7 @@
             </div>
 
             <div class="section">
-                <h2 class="section-title"><span class="emoji">🌟</span>Feature Overview</h2>
+                <h2 class="section-header"><span class="emoji">🌟</span>Feature Overview</h2>
                 <p>Camp Half-Blood is a comprehensive roleplaying and economy system that bridges Discord and Minecraft:</p>
                 
                 <div class="feature-grid">
@@ -641,7 +1484,7 @@
             </div>
 
             <div class="section">
-                <h2 class="section-title"><span class="emoji">🌐</span>Player Portal</h2>
+                <h2 class="section-header"><span class="emoji">🌐</span>Player Portal</h2>
                 <p>Access your demigod profile from anywhere with the web-based Player Portal!</p>
                 
                 <div class="feature-grid">
@@ -673,7 +1516,7 @@
         <!-- PROFILE & MAIL TAB -->
         <div id="profile" class="tab-content">
             <div class="section">
-                <h2 class="section-title"><span class="emoji">👤</span>Your Demigod Profile</h2>
+                <h2 class="section-header"><span class="emoji">👤</span>Your Demigod Profile</h2>
                 <p>Your profile is the central hub for everything at Camp Half-Blood. It displays your stats, provides quick access to all features, and shows your progression.</p>
                 
                 <div class="command">
@@ -700,7 +1543,7 @@
             </div>
 
             <div class="section">
-                <h2 class="section-title"><span class="emoji">📬</span>Mail System</h2>
+                <h2 class="section-header"><span class="emoji">📬</span>Mail System</h2>
                 <p>The mail system keeps you informed about everything happening at camp. You'll receive notifications for important events automatically.</p>
                 
                 <div class="command">
@@ -765,7 +1608,7 @@
             </div>
 
             <div class="section">
-                <h2 class="section-title"><span class="emoji">🎒</span>Inventory System</h2>
+                <h2 class="section-header"><span class="emoji">🎒</span>Inventory System</h2>
                 <p>Your inventory holds all items you've purchased or received. Some items can be redeemed in Minecraft, while others have special uses.</p>
                 
                 <div class="command">
@@ -790,7 +1633,7 @@
         <!-- ECONOMY TAB -->
         <div id="economy" class="tab-content">
             <div class="section">
-                <h2 class="section-title"><span class="emoji">💰</span>Drachma Currency</h2>
+                <h2 class="section-header"><span class="emoji">💰</span>Drachma Currency</h2>
                 <p>Golden Drachma is the currency of Camp Half-Blood. Earn it through various activities and spend it in the camp store or player shops.</p>
                 
                 <div class="command">
@@ -847,7 +1690,7 @@
             </div>
 
             <div class="section">
-                <h2 class="section-title"><span class="emoji">🏪</span>Camp Store</h2>
+                <h2 class="section-header"><span class="emoji">🏪</span>Camp Store</h2>
                 <p>The official camp store offers various items across multiple categories. Browse with the dropdown menu and purchase with interactive buttons.</p>
                 
                 <div class="command">
@@ -932,7 +1775,7 @@
         <!-- MINI-GAMES TAB -->
         <div id="games" class="tab-content">
             <div class="section">
-                <h2 class="section-title"><span class="emoji">🎮</span>Mini-Games Arcade</h2>
+                <h2 class="section-header"><span class="emoji">🎮</span>Mini-Games Arcade</h2>
                 <p>Camp Half-Blood features 10 unique mythology-themed mini-games. Each has different mechanics and rewards. Games have cooldowns to prevent spam.</p>
                 
                 <div class="command">
@@ -948,122 +1791,74 @@
             </div>
 
             <div class="section">
-                <h2 class="section-title"><span class="emoji">🎯</span>All 10 Mini-Games</h2>
+                <h2 class="section-header"><span class="emoji">🎯</span>All 10 Mini-Games</h2>
                 
                 <div class="game-card">
                     <h4>⚔️ Godly Trials</h4>
                     <p>Face 3 mythological encounters! Each round presents a monster or challenge with multiple choices. Different options have different success rates. Win 2 out of 3 rounds to claim your reward.</p>
-                    <p><strong>Mechanics:</strong> Each choice has a hidden success percentage. Think strategically about which approach works best against each monster.</p>
                     <span class="game-reward">Reward: 3 💰 for victory</span>
                 </div>
 
                 <div class="game-card">
                     <h4>🏛️ Labyrinth Escape</h4>
-                    <p>Navigate through Daedalus's Labyrinth across 3 increasingly difficult rounds! Avoid the Minotaur (🐂), dodge traps (⬛), and find the exit (🚪).</p>
-                    <p><strong>Mechanics:</strong> Use arrow buttons to move. 4 HP, 25 moves per round. Minotaurs move towards you in later rounds. Walls (🧱) block movement.</p>
+                    <p>Navigate through Daedalus's Labyrinth across 3 increasingly difficult rounds! Avoid the Minotaur (🐂), dodge traps (⬛), and find the exit (🚪). Use arrow buttons to move. 4 HP, 25 moves per round.</p>
                     <span class="game-reward">Reward: 5 💰 for completing all 3 rounds</span>
                 </div>
 
                 <div class="game-card">
                     <h4>🐕 Cerberus Dodge</h4>
-                    <p>Dodge Cerberus's three heads as long as possible! The three-headed guardian attacks left, center, or right each turn.</p>
-                    <p><strong>Mechanics:</strong> Choose where to dodge BEFORE he attacks. If you dodge to where he attacks, you take damage. Survive as long as possible for more points!</p>
+                    <p>Dodge Cerberus's three heads as long as possible! Choose where to dodge BEFORE he attacks. Survive as long as possible for more points!</p>
                     <span class="game-reward">Reward: 1-5 💰 based on score</span>
                 </div>
 
                 <div class="game-card">
                     <h4>🏇 Chariot Race</h4>
-                    <p>Race your chariot against a rival to the finish line! Manage your stamina wisely to outpace your opponent.</p>
-                    <p><strong>Mechanics:</strong> Sprint (3-5 spaces, -20 stamina), Run (2 spaces, -10 stamina), or Rest (+30 stamina). Your rival moves 2-4 spaces each turn.</p>
+                    <p>Race your chariot against a rival to the finish line! Sprint (3-5 spaces, -20 stamina), Run (2 spaces, -10 stamina), or Rest (+30 stamina).</p>
                     <span class="game-reward">Reward: 4 💰 for victory</span>
                 </div>
 
                 <div class="game-card">
                     <h4>🏹 Olympian Archery</h4>
-                    <p>Master the bow at the archery range! Aim for the bullseye across multiple shots.</p>
-                    <p><strong>Mechanics:</strong> You have 5 arrows. Each shot has varying accuracy. Score points based on where you hit the target.</p>
+                    <p>Master the bow at the archery range! You have 5 arrows. Score points based on where you hit the target.</p>
                     <span class="game-reward">Reward: Variable based on accuracy</span>
                 </div>
 
                 <div class="game-card">
                     <h4>⚡ Lightning Roulette</h4>
-                    <p>A high-risk, high-reward game of chance! Let Zeus's lightning decide your fate.</p>
-                    <p><strong>Mechanics:</strong> Choose to bet increasing amounts. Higher bets mean higher potential rewards but also higher risk of losing everything!</p>
+                    <p>A high-risk, high-reward game of chance! Let Zeus's lightning decide your fate. Higher bets mean higher potential rewards but also higher risk!</p>
                     <span class="game-reward">Reward: 2-25 💰 (high variance)</span>
                 </div>
 
                 <div class="game-card">
                     <h4>🐉 Hydra Strike</h4>
-                    <p>Battle the Hydra by cutting all its heads! But be careful—cut the wrong head and two more grow back!</p>
-                    <p><strong>Mechanics:</strong> Choose which head to strike. Some heads are "real" (can be cut), others spawn more. Cut all real heads to win.</p>
+                    <p>Battle the Hydra by cutting all its heads! Be careful—cut the wrong head and two more grow back! Cut all real heads to win.</p>
                     <span class="game-reward">Reward: 4-6 💰</span>
                 </div>
 
                 <div class="game-card">
                     <h4>🔮 Oracle's Vision</h4>
-                    <p>Test your memory with the Oracle's mystical symbols! Match pairs of hidden symbols.</p>
-                    <p><strong>Mechanics:</strong> Classic memory match game. Flip cards to find matching pairs. Complete the board with fewer flips for bonus rewards.</p>
+                    <p>Test your memory with the Oracle's mystical symbols! Classic memory match game. Complete the board with fewer flips for bonus rewards.</p>
                     <span class="game-reward">Reward: 4-7 💰</span>
                 </div>
 
                 <div class="game-card">
                     <h4>🎵 Siren's Song</h4>
-                    <p>Resist the Siren's enchanting melody! Remember the sequence and repeat it back.</p>
-                    <p><strong>Mechanics:</strong> Simon Says-style memory game. Watch the pattern of notes, then repeat them in order. Sequences get longer each round.</p>
+                    <p>Resist the Siren's enchanting melody! Simon Says-style memory game. Watch the pattern of notes, then repeat them in order.</p>
                     <span class="game-reward">Reward: Variable based on rounds survived</span>
                 </div>
 
                 <div class="game-card">
                     <h4>🦄 Pegasus Flight</h4>
-                    <p>Fly your Pegasus to Mount Olympus! Navigate through storm clouds and manage your stamina.</p>
-                    <p><strong>Mechanics:</strong> Fly up, straight, or down. Avoid storm clouds (obstacles). Use Boost for +3 distance but -20 stamina. Reach the goal before running out of stamina.</p>
+                    <p>Fly your Pegasus to Mount Olympus! Navigate through storm clouds and manage your stamina. Reach the goal before running out of stamina.</p>
                     <span class="game-reward">Reward: 5 💰 for reaching Olympus</span>
                 </div>
-            </div>
-
-            <div class="section">
-                <h2 class="section-title"><span class="emoji">⚡</span>Daily Challenges</h2>
-                <p>Every day at the scheduled time, a prompt appears with a special challenge! React quickly to earn bonus Drachma.</p>
-
-                <div class="command">
-                    <div class="command-name">!daily</div>
-                    <div class="command-desc">Learn about the daily challenge system and how it works.</div>
-                </div>
-
-                <h3>How Daily Challenges Work</h3>
-                <div class="steps">
-                    <div class="step">
-                        <div class="step-title">Daily Prompt Appears</div>
-                        <p>A themed prompt is posted to the designated channel with a ⚡ reaction.</p>
-                    </div>
-                    <div class="step">
-                        <div class="step-title">React Within 1 Hour</div>
-                        <p>Click the ⚡ reaction within the time window to receive your personal challenge.</p>
-                    </div>
-                    <div class="step">
-                        <div class="step-title">Answer the Challenge</div>
-                        <p>A mythology trivia question appears just for you. Answer correctly to earn 2-12 Drachma!</p>
-                    </div>
-                </div>
-
-                <h3>Challenge Types</h3>
-                <ul>
-                    <li>🐍 <strong>Serpent's Riddle:</strong> Classic riddles to solve</li>
-                    <li>⚖️ <strong>Athena's Test:</strong> Greek mythology trivia</li>
-                    <li>🎲 <strong>Hermes' Gambit:</strong> A game of chance and wit</li>
-                    <li>🔥 <strong>Hephaestus' Forge:</strong> Crafting knowledge</li>
-                    <li>🌊 <strong>Poseidon's Wave:</strong> Sea god lore</li>
-                    <li>💀 <strong>Hades' Bargain:</strong> Underworld knowledge</li>
-                    <li>⚡ <strong>Zeus' Storm:</strong> King of gods trivia</li>
-                    <li>🍇 <strong>Dionysus' Game:</strong> Wine god questions</li>
-                </ul>
             </div>
         </div>
 
         <!-- GODS & CABINS TAB -->
         <div id="gods" class="tab-content">
             <div class="section">
-                <h2 class="section-title"><span class="emoji">🏛️</span>The Olympian Gods</h2>
+                <h2 class="section-header"><span class="emoji">🏛️</span>The Olympian Gods</h2>
                 <p>Discover your godly heritage! Each god grants different traits and connects you to a unique mythological legacy.</p>
                 
                 <div class="command">
@@ -1085,106 +1880,30 @@
 
                 <h3>All Available Gods</h3>
                 <div class="god-grid">
-                    <div class="god-card">
-                        <div class="god-emoji">⚡</div>
-                        <div class="god-name">Zeus</div>
-                        <div class="god-domain">Sky, Thunder, King</div>
-                    </div>
-                    <div class="god-card">
-                        <div class="god-emoji">🔱</div>
-                        <div class="god-name">Poseidon</div>
-                        <div class="god-domain">Sea, Earthquakes</div>
-                    </div>
-                    <div class="god-card">
-                        <div class="god-emoji">💀</div>
-                        <div class="god-name">Hades</div>
-                        <div class="god-domain">Underworld, Death</div>
-                    </div>
-                    <div class="god-card">
-                        <div class="god-emoji">🦉</div>
-                        <div class="god-name">Athena</div>
-                        <div class="god-domain">Wisdom, Warfare</div>
-                    </div>
-                    <div class="god-card">
-                        <div class="god-emoji">☀️</div>
-                        <div class="god-name">Apollo</div>
-                        <div class="god-domain">Sun, Music, Healing</div>
-                    </div>
-                    <div class="god-card">
-                        <div class="god-emoji">🏹</div>
-                        <div class="god-name">Artemis</div>
-                        <div class="god-domain">Hunt, Moon</div>
-                    </div>
-                    <div class="god-card">
-                        <div class="god-emoji">⚔️</div>
-                        <div class="god-name">Ares</div>
-                        <div class="god-domain">War, Violence</div>
-                    </div>
-                    <div class="god-card">
-                        <div class="god-emoji">💕</div>
-                        <div class="god-name">Aphrodite</div>
-                        <div class="god-domain">Love, Beauty</div>
-                    </div>
-                    <div class="god-card">
-                        <div class="god-emoji">🔨</div>
-                        <div class="god-name">Hephaestus</div>
-                        <div class="god-domain">Fire, Forge</div>
-                    </div>
-                    <div class="god-card">
-                        <div class="god-emoji">👟</div>
-                        <div class="god-name">Hermes</div>
-                        <div class="god-domain">Travel, Thieves</div>
-                    </div>
-                    <div class="god-card">
-                        <div class="god-emoji">🌾</div>
-                        <div class="god-name">Demeter</div>
-                        <div class="god-domain">Agriculture, Harvest</div>
-                    </div>
-                    <div class="god-card">
-                        <div class="god-emoji">🍇</div>
-                        <div class="god-name">Dionysus</div>
-                        <div class="god-domain">Wine, Festivity</div>
-                    </div>
-                    <div class="god-card">
-                        <div class="god-emoji">👑</div>
-                        <div class="god-name">Hera</div>
-                        <div class="god-domain">Marriage, Family</div>
-                    </div>
-                    <div class="god-card">
-                        <div class="god-emoji">🌙</div>
-                        <div class="god-name">Hecate</div>
-                        <div class="god-domain">Magic, Crossroads</div>
-                    </div>
-                    <div class="god-card">
-                        <div class="god-emoji">😴</div>
-                        <div class="god-name">Hypnos</div>
-                        <div class="god-domain">Sleep, Dreams</div>
-                    </div>
-                    <div class="god-card">
-                        <div class="god-emoji">🏆</div>
-                        <div class="god-name">Nike</div>
-                        <div class="god-domain">Victory</div>
-                    </div>
-                    <div class="god-card">
-                        <div class="god-emoji">⚖️</div>
-                        <div class="god-name">Nemesis</div>
-                        <div class="god-domain">Revenge, Balance</div>
-                    </div>
-                    <div class="god-card">
-                        <div class="god-emoji">🌈</div>
-                        <div class="god-name">Iris</div>
-                        <div class="god-domain">Rainbows, Messages</div>
-                    </div>
-                    <div class="god-card">
-                        <div class="god-emoji">🎲</div>
-                        <div class="god-name">Tyche</div>
-                        <div class="god-domain">Luck, Fortune</div>
-                    </div>
+                    <div class="god-card"><div class="god-emoji">⚡</div><div class="god-name">Zeus</div><div class="god-domain">Sky, Thunder, King</div></div>
+                    <div class="god-card"><div class="god-emoji">🔱</div><div class="god-name">Poseidon</div><div class="god-domain">Sea, Earthquakes</div></div>
+                    <div class="god-card"><div class="god-emoji">💀</div><div class="god-name">Hades</div><div class="god-domain">Underworld, Death</div></div>
+                    <div class="god-card"><div class="god-emoji">🦉</div><div class="god-name">Athena</div><div class="god-domain">Wisdom, Warfare</div></div>
+                    <div class="god-card"><div class="god-emoji">☀️</div><div class="god-name">Apollo</div><div class="god-domain">Sun, Music, Healing</div></div>
+                    <div class="god-card"><div class="god-emoji">🏹</div><div class="god-name">Artemis</div><div class="god-domain">Hunt, Moon</div></div>
+                    <div class="god-card"><div class="god-emoji">⚔️</div><div class="god-name">Ares</div><div class="god-domain">War, Violence</div></div>
+                    <div class="god-card"><div class="god-emoji">💕</div><div class="god-name">Aphrodite</div><div class="god-domain">Love, Beauty</div></div>
+                    <div class="god-card"><div class="god-emoji">🔨</div><div class="god-name">Hephaestus</div><div class="god-domain">Fire, Forge</div></div>
+                    <div class="god-card"><div class="god-emoji">👟</div><div class="god-name">Hermes</div><div class="god-domain">Travel, Thieves</div></div>
+                    <div class="god-card"><div class="god-emoji">🌾</div><div class="god-name">Demeter</div><div class="god-domain">Agriculture, Harvest</div></div>
+                    <div class="god-card"><div class="god-emoji">🍇</div><div class="god-name">Dionysus</div><div class="god-domain">Wine, Festivity</div></div>
+                    <div class="god-card"><div class="god-emoji">👑</div><div class="god-name">Hera</div><div class="god-domain">Marriage, Family</div></div>
+                    <div class="god-card"><div class="god-emoji">🌙</div><div class="god-name">Hecate</div><div class="god-domain">Magic, Crossroads</div></div>
+                    <div class="god-card"><div class="god-emoji">😴</div><div class="god-name">Hypnos</div><div class="god-domain">Sleep, Dreams</div></div>
+                    <div class="god-card"><div class="god-emoji">🏆</div><div class="god-name">Nike</div><div class="god-domain">Victory</div></div>
+                    <div class="god-card"><div class="god-emoji">⚖️</div><div class="god-name">Nemesis</div><div class="god-domain">Revenge, Balance</div></div>
+                    <div class="god-card"><div class="god-emoji">🌈</div><div class="god-name">Iris</div><div class="god-domain">Rainbows, Messages</div></div>
+                    <div class="god-card"><div class="god-emoji">🎲</div><div class="god-name">Tyche</div><div class="god-domain">Luck, Fortune</div></div>
                 </div>
             </div>
 
             <div class="section">
-                <h2 class="section-title"><span class="emoji">🏕️</span>Cabin System</h2>
+                <h2 class="section-header"><span class="emoji">🏕️</span>Cabin System</h2>
                 <p>Cabins are teams of demigods working together. Join forces with fellow campers to earn Divine Favor and compete with other cabins!</p>
                 
                 <div class="command">
@@ -1205,11 +1924,6 @@
                 <div class="command">
                     <div class="command-name">!cabin invite @user</div>
                     <div class="command-desc">[Leader Only] Invite a player to join your cabin.</div>
-                </div>
-
-                <div class="command">
-                    <div class="command-name">!cabin leave</div>
-                    <div class="command-desc">Leave your current cabin. Leaders must transfer leadership first.</div>
                 </div>
 
                 <h3>Divine Favor System</h3>
@@ -1255,7 +1969,7 @@
         <!-- QUESTS & EVENTS TAB -->
         <div id="quests" class="tab-content">
             <div class="section">
-                <h2 class="section-title"><span class="emoji">📜</span>Quest System</h2>
+                <h2 class="section-header"><span class="emoji">📜</span>Quest System</h2>
                 <p>Embark on heroic quests for glory and Drachma! Accept quests from the board or propose your own adventures.</p>
                 
                 <div class="command">
@@ -1300,28 +2014,23 @@
                 
                 <div class="steps">
                     <div class="step">
-                        <div class="step-title">Submit Your Quest Idea</div>
+                        <div class="step-title-doc">Submit Your Quest Idea</div>
                         <p>Fill out the quest name, detailed description, and who's joining you.</p>
                     </div>
                     <div class="step">
-                        <div class="step-title">Admin Review</div>
+                        <div class="step-title-doc">Admin Review</div>
                         <p>Staff will review your quest and approve or deny it with feedback.</p>
                     </div>
                     <div class="step">
-                        <div class="step-title">Complete the Quest</div>
+                        <div class="step-title-doc">Complete the Quest</div>
                         <p>Once approved, complete your quest and report back for rewards!</p>
                     </div>
-                </div>
-
-                <div class="info-box tip">
-                    <div class="info-box-title">💡 Quest Tips</div>
-                    <p>Be creative with your quest proposals! Include roleplay elements, challenges, and goals. Staff will set appropriate rewards based on difficulty.</p>
                 </div>
             </div>
 
             <div class="section">
-                <h2 class="section-title"><span class="emoji">🏆</span>Camp Events</h2>
-                <p>Participate in scheduled camp events for glory and rewards! Events range from chariot races to capture the flag.</p>
+                <h2 class="section-header"><span class="emoji">🏆</span>Camp Events</h2>
+                <p>Participate in scheduled camp events for glory and rewards!</p>
                 
                 <div class="command">
                     <div class="command-name">!events</div>
@@ -1334,44 +2043,31 @@
                     <div class="feature-card">
                         <h4>🏇 Chariot Racing</h4>
                         <p>Race your chariot around the track!</p>
-                        <p><strong>Rewards:</strong> 1st: 50💰, 2nd: 30💰, 3rd: 15💰, Participation: 5💰</p>
+                        <p><strong>Rewards:</strong> 1st: 50💰, 2nd: 30💰, 3rd: 15💰</p>
                     </div>
                     <div class="feature-card">
                         <h4>🚩 Capture the Flag</h4>
                         <p>Classic camp game—capture the enemy's flag!</p>
-                        <p><strong>Rewards:</strong> Winners: 40💰, MVP: +20💰 bonus, Participation: 10💰</p>
+                        <p><strong>Rewards:</strong> Winners: 40💰, MVP: +20💰 bonus</p>
                     </div>
                     <div class="feature-card">
                         <h4>🐉 Monster Hunt</h4>
                         <p>Track and defeat a monster threatening camp!</p>
-                        <p><strong>Rewards:</strong> Completion: 60💰, Participation: 15💰</p>
+                        <p><strong>Rewards:</strong> Completion: 60💰</p>
                     </div>
                     <div class="feature-card">
                         <h4>🏅 Olympian Games</h4>
                         <p>Compete in various athletic events!</p>
-                        <p><strong>Rewards:</strong> Gold: 75💰, Silver: 50💰, Bronze: 25💰, Participation: 10💰</p>
+                        <p><strong>Rewards:</strong> Gold: 75💰, Silver: 50💰, Bronze: 25💰</p>
                     </div>
                 </div>
-            </div>
-
-            <div class="section">
-                <h2 class="section-title"><span class="emoji">📜</span>Timeline & Camp History</h2>
-                <p>The camp timeline records important events and stories. Anyone can contribute to camp history!</p>
-                
-                <div class="command">
-                    <div class="command-name">!timeline</div>
-                    <div class="command-aliases">Aliases: !history, !camphistory</div>
-                    <div class="command-desc">View the community timeline and add your own entries.</div>
-                </div>
-
-                <p>Timeline entries include event dates, titles, descriptions, and author names. Use the interactive buttons to add new entries or edit your own contributions.</p>
             </div>
         </div>
 
         <!-- PLAYER SHOPS TAB -->
         <div id="shops" class="tab-content">
             <div class="section">
-                <h2 class="section-title"><span class="emoji">🏪</span>Player Shop System</h2>
+                <h2 class="section-header"><span class="emoji">🏪</span>Player Shop System</h2>
                 <p>Own and operate your own shop at Camp Half-Blood! Sell Minecraft items to other players and build your fortune.</p>
                 
                 <div class="info-box warning">
@@ -1381,30 +2077,30 @@
             </div>
 
             <div class="section">
-                <h2 class="section-title"><span class="emoji">📝</span>Opening Your Shop</h2>
+                <h2 class="section-header"><span class="emoji">📝</span>Opening Your Shop</h2>
                 
                 <div class="steps">
                     <div class="step">
-                        <div class="step-title">Buy a Shop Permit</div>
+                        <div class="step-title-doc">Buy a Shop Permit</div>
                         <p>Use <code>!shop</code> and navigate to Permits. Purchase the Shop Permit for 500 Drachma.</p>
                     </div>
                     <div class="step">
-                        <div class="step-title">Use the Permit</div>
+                        <div class="step-title-doc">Use the Permit</div>
                         <p>Open <code>!inventory</code> and select the Shop Permit. Click "Create My Shop" to begin.</p>
                     </div>
                     <div class="step">
-                        <div class="step-title">Name Your Shop</div>
+                        <div class="step-title-doc">Name Your Shop</div>
                         <p>Enter your shop name and description in the modal that appears.</p>
                     </div>
                     <div class="step">
-                        <div class="step-title">Choose Shop Type</div>
+                        <div class="step-title-doc">Choose Shop Type</div>
                         <p>Select from: General Store, Weapon Shop, Armor Shop, Potion Shop, Building Materials, Food & Supplies, Rare Items, Enchanting Services, or Other.</p>
                     </div>
                 </div>
             </div>
 
             <div class="section">
-                <h2 class="section-title"><span class="emoji">🛠️</span>Managing Your Shop</h2>
+                <h2 class="section-header"><span class="emoji">🛠️</span>Managing Your Shop</h2>
                 
                 <div class="command">
                     <div class="command-name">!myshop</div>
@@ -1419,33 +2115,23 @@
                     <li><strong>Pending Orders:</strong> View orders waiting for delivery</li>
                     <li><strong>Remove Listing:</strong> Take items off sale</li>
                 </ul>
-
-                <h3>Adding Items</h3>
-                <p>When adding items, you'll need to provide:</p>
-                <ul>
-                    <li><strong>Display Name:</strong> What customers see (e.g., "Enchanted Diamond Sword")</li>
-                    <li><strong>Minecraft Item ID:</strong> The actual item (e.g., <code>minecraft:diamond_sword</code>)</li>
-                    <li><strong>Quantity:</strong> How many items (1-64)</li>
-                    <li><strong>Price:</strong> Cost in Drachma</li>
-                    <li><strong>NBT Data:</strong> (Optional) For enchantments like <code>{Enchantments:[{id:"sharpness",lvl:5}]}</code></li>
-                </ul>
             </div>
 
             <div class="section">
-                <h2 class="section-title"><span class="emoji">📦</span>Order Fulfillment</h2>
+                <h2 class="section-header"><span class="emoji">📦</span>Order Fulfillment</h2>
                 <p>When someone buys from your shop, you receive a delivery order that you must fulfill.</p>
                 
                 <div class="steps">
                     <div class="step">
-                        <div class="step-title">Receive Order Notification</div>
+                        <div class="step-title-doc">Receive Order Notification</div>
                         <p>You'll get mail when someone purchases from your shop with their Minecraft username.</p>
                     </div>
                     <div class="step">
-                        <div class="step-title">Deliver In-Game</div>
+                        <div class="step-title-doc">Deliver In-Game</div>
                         <p>Meet the buyer in Minecraft and give them the items they purchased.</p>
                     </div>
                     <div class="step">
-                        <div class="step-title">Mark Complete</div>
+                        <div class="step-title-doc">Mark Complete</div>
                         <p>Use <code>!myshop</code> → Pending Orders → Mark Complete to finalize the sale and receive payment.</p>
                     </div>
                 </div>
@@ -1457,7 +2143,7 @@
             </div>
 
             <div class="section">
-                <h2 class="section-title"><span class="emoji">🛒</span>Browsing Player Shops</h2>
+                <h2 class="section-header"><span class="emoji">🛒</span>Browsing Player Shops</h2>
                 
                 <div class="command">
                     <div class="command-name">!playershops</div>
@@ -1465,19 +2151,19 @@
                     <div class="command-desc">Browse all active player shops and their listings.</div>
                 </div>
 
-                <p>Select a shop from the list to view its items. Each listing shows the item name, price, and a Buy button. Purchasing creates a delivery order for the shop owner.</p>
+                <p>Select a shop from the list to view its items. Each listing shows the item name, price, and a Buy button.</p>
             </div>
         </div>
 
         <!-- MINECRAFT TAB -->
         <div id="minecraft" class="tab-content">
             <div class="section">
-                <h2 class="section-title"><span class="emoji">⛏️</span>Minecraft Integration</h2>
-                <p>Camp Half-Blood features full two-way synchronization between Discord and Minecraft. Your Drachma, items, and stats transfer seamlessly!</p>
+                <h2 class="section-header"><span class="emoji">⛏️</span>Minecraft Integration</h2>
+                <p>Camp Half-Blood features full two-way synchronization between Discord and Minecraft!</p>
                 
                 <div class="command">
                     <div class="command-name">!mclink [MinecraftName]</div>
-                    <div class="command-desc">Link your Discord account to your Minecraft account. Replace [MinecraftName] with your exact in-game name.</div>
+                    <div class="command-desc">Link your Discord account to your Minecraft account.</div>
                 </div>
 
                 <div class="command">
@@ -1495,17 +2181,10 @@
                     <div class="command-aliases">Aliases: !online, !whoisonline</div>
                     <div class="command-desc">See which linked players are currently online in Minecraft.</div>
                 </div>
-
-                <div class="command">
-                    <div class="command-name">!mchistory</div>
-                    <div class="command-aliases">Aliases: !transactions, !txhistory</div>
-                    <div class="command-desc">View your recent Drachma transaction history between platforms.</div>
-                </div>
             </div>
 
             <div class="section">
-                <h2 class="section-title"><span class="emoji">🎮</span>In-Game Minecraft Commands</h2>
-                <p>Use these commands while playing on the Minecraft server:</p>
+                <h2 class="section-header"><span class="emoji">🎮</span>In-Game Minecraft Commands</h2>
                 
                 <h3>Profile & Balance</h3>
                 <div class="command">
@@ -1530,11 +2209,6 @@
                 </div>
 
                 <div class="command">
-                    <div class="command-name">/chbdeposit [amount]</div>
-                    <div class="command-desc">Deposit a specific amount of Drachma items.</div>
-                </div>
-
-                <div class="command">
                     <div class="command-name">/chbwithdraw [amount]</div>
                     <div class="command-desc">Withdraw Drachma as physical items in-game.</div>
                 </div>
@@ -1542,23 +2216,12 @@
                 <h3>Item Delivery</h3>
                 <div class="command">
                     <div class="command-name">/chbpending</div>
-                    <div class="command-desc">Receive items that were purchased on Discord. Items are also auto-delivered on login!</div>
-                </div>
-
-                <h3>Other</h3>
-                <div class="command">
-                    <div class="command-name">/chblb</div>
-                    <div class="command-desc">View the Drachma leaderboard.</div>
-                </div>
-
-                <div class="command">
-                    <div class="command-name">/chbhelp</div>
-                    <div class="command-desc">Show all available in-game commands.</div>
+                    <div class="command-desc">Receive items that were purchased on Discord.</div>
                 </div>
             </div>
 
             <div class="section">
-                <h2 class="section-title"><span class="emoji">🔄</span>How Sync Works</h2>
+                <h2 class="section-header"><span class="emoji">🔄</span>How Sync Works</h2>
                 
                 <div class="feature-grid">
                     <div class="feature-card">
@@ -1589,7 +2252,7 @@
         <!-- ADMIN TAB -->
         <div id="admin" class="tab-content">
             <div class="section">
-                <h2 class="section-title"><span class="emoji">⚙️</span>Admin Console</h2>
+                <h2 class="section-header"><span class="emoji">⚙️</span>Admin Console</h2>
                 <p>Staff-only commands for managing Camp Half-Blood. Requires administrator permissions.</p>
                 
                 <div class="command">
@@ -1605,7 +2268,7 @@
             </div>
 
             <div class="section">
-                <h2 class="section-title"><span class="emoji">💰</span>Economy Management</h2>
+                <h2 class="section-header"><span class="emoji">💰</span>Economy Management</h2>
                 
                 <div class="command">
                     <div class="command-name">!give @user [amount]</div>
@@ -1624,7 +2287,7 @@
             </div>
 
             <div class="section">
-                <h2 class="section-title"><span class="emoji">📜</span>Quest & Event Management</h2>
+                <h2 class="section-header"><span class="emoji">📜</span>Quest & Event Management</h2>
                 
                 <div class="command">
                     <div class="command-name">!createquest "[Title]" [difficulty] [reward]</div>
@@ -1643,36 +2306,12 @@
 
                 <div class="command">
                     <div class="command-name">!bulkaward [event_id] [placement] @user1 @user2...</div>
-                    <div class="command-desc">Award event rewards to multiple players at once. Placements: 1st, 2nd, 3rd, winner, mvp, participation.</div>
+                    <div class="command-desc">Award event rewards to multiple players at once.</div>
                 </div>
             </div>
 
             <div class="section">
-                <h2 class="section-title"><span class="emoji">🎮</span>Minecraft Admin</h2>
-                
-                <div class="command">
-                    <div class="command-name">!mctest</div>
-                    <div class="command-desc">Test the RCON connection to the Minecraft server.</div>
-                </div>
-
-                <div class="command">
-                    <div class="command-name">!mcsyncall</div>
-                    <div class="command-desc">Force sync all currently online Minecraft players.</div>
-                </div>
-
-                <div class="command">
-                    <div class="command-name">!syncmc</div>
-                    <div class="command-desc">Manually sync all pending Minecraft transactions.</div>
-                </div>
-
-                <div class="command">
-                    <div class="command-name">!mctestpending</div>
-                    <div class="command-desc">Debug: Check for pending transactions in Minecraft data storage.</div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h2 class="section-title"><span class="emoji">💾</span>Backup & Data Management</h2>
+                <h2 class="section-header"><span class="emoji">💾</span>Backup & Data Management</h2>
                 <p>Access backup options through the Admin Console (<code>!admin</code>):</p>
                 
                 <ul>
@@ -1687,55 +2326,174 @@
                     <p>The "Reset All Data" option permanently deletes ALL player data, cabins, inventories, and history. Always create a backup first!</p>
                 </div>
             </div>
-
-            <div class="section">
-                <h2 class="section-title"><span class="emoji">📢</span>Daily Prompts</h2>
-                
-                <div class="command">
-                    <div class="command-name">!prompt [category]</div>
-                    <div class="command-desc">Manually send a daily prompt. Optional: specify category (campfire_stories, training_mishaps, monster_rumors, godly_mythology, cabin_life).</div>
-                </div>
-
-                <div class="command">
-                    <div class="command-name">!testchallenge</div>
-                    <div class="command-desc">Test a mythological challenge interaction.</div>
-                </div>
-            </div>
         </div>
     </main>
 
+    <!-- FOOTER -->
     <footer>
-        <p>⚡ Camp Half-Blood Bot Documentation ⚡</p>
+        <div class="footer-brand">⚡ Camp Half-Blood ⚡</div>
         <p>Built for demigods, by demigods</p>
+        <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.7;">Discord & Minecraft Integration • Player Portal • Bot Documentation</p>
     </footer>
 
     <script>
-        // Tab Navigation
+        // ══════════════════════════════════════════════════════════════════════════
+        // STARFIELD GENERATION
+        // ══════════════════════════════════════════════════════════════════════════
+        
+        function createStarfield() {
+            const starfield = document.getElementById('starfield');
+            const numStars = 150;
+            
+            for (let i = 0; i < numStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = (Math.random() * 2 + 1) + 'px';
+                star.style.height = star.style.width;
+                star.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
+                star.style.animationDelay = Math.random() * 5 + 's';
+                starfield.appendChild(star);
+            }
+            
+            // Add shooting stars
+            for (let i = 0; i < 3; i++) {
+                const shootingStar = document.createElement('div');
+                shootingStar.className = 'shooting-star';
+                shootingStar.style.left = (Math.random() * 50) + '%';
+                shootingStar.style.top = (Math.random() * 30) + '%';
+                shootingStar.style.animationDelay = (i * 8 + Math.random() * 5) + 's';
+                starfield.appendChild(shootingStar);
+            }
+        }
+
+        // ══════════════════════════════════════════════════════════════════════════
+        // FLOATING PARTICLES
+        // ══════════════════════════════════════════════════════════════════════════
+        
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const numParticles = 20;
+            
+            for (let i = 0; i < numParticles; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 6 + 6) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // ══════════════════════════════════════════════════════════════════════════
+        // SCROLL REVEAL ANIMATION
+        // ══════════════════════════════════════════════════════════════════════════
+        
+        function setupScrollReveal() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.classList.add('visible');
+                        }, index * 100);
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            document.querySelectorAll('.scroll-reveal, .journey-step').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // ══════════════════════════════════════════════════════════════════════════
+        // NAVIGATION VISIBILITY
+        // ══════════════════════════════════════════════════════════════════════════
+        
+        let lastScrollY = 0;
+        let navVisible = false;
+
+        function handleNavVisibility() {
+            const nav = document.getElementById('main-nav');
+            const scrollY = window.scrollY;
+            const landingHeight = document.getElementById('landing').offsetHeight;
+            
+            if (scrollY > landingHeight - 100) {
+                if (!navVisible) {
+                    nav.classList.add('visible');
+                    navVisible = true;
+                }
+            } else {
+                if (navVisible) {
+                    nav.classList.remove('visible');
+                    navVisible = false;
+                }
+            }
+            
+            lastScrollY = scrollY;
+        }
+
+        // ══════════════════════════════════════════════════════════════════════════
+        // PAGE TRANSITIONS
+        // ══════════════════════════════════════════════════════════════════════════
+        
+        function enterCamp() {
+            document.getElementById('welcome').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showDocs() {
+            document.getElementById('landing').style.display = 'none';
+            document.getElementById('welcome').style.display = 'none';
+            document.getElementById('journey').style.display = 'none';
+            document.getElementById('cta').style.display = 'none';
+            document.getElementById('documentation').classList.add('active');
+            document.getElementById('main-nav').classList.add('visible');
+            window.scrollTo(0, 0);
+        }
+
+        function showLanding() {
+            document.getElementById('landing').style.display = 'flex';
+            document.getElementById('welcome').style.display = 'block';
+            document.getElementById('journey').style.display = 'block';
+            document.getElementById('cta').style.display = 'block';
+            document.getElementById('documentation').classList.remove('active');
+            window.scrollTo(0, 0);
+        }
+
+        // ══════════════════════════════════════════════════════════════════════════
+        // TAB NAVIGATION
+        // ══════════════════════════════════════════════════════════════════════════
+        
         document.querySelectorAll('.nav-btn[data-tab]').forEach(btn => {
             btn.addEventListener('click', () => {
-                // Remove active class from all buttons and tabs
                 document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
                 
-                // Add active class to clicked button and corresponding tab
                 btn.classList.add('active');
                 const tabId = btn.dataset.tab;
                 document.getElementById(tabId).classList.add('active');
                 
-                // Scroll to top of content
+                // Show docs if on landing page
+                if (!document.getElementById('documentation').classList.contains('active')) {
+                    showDocs();
+                }
+                
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         });
 
-        // Smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
-                }
-            });
+        // ══════════════════════════════════════════════════════════════════════════
+        // INITIALIZATION
+        // ══════════════════════════════════════════════════════════════════════════
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            createStarfield();
+            createParticles();
+            setupScrollReveal();
+            window.addEventListener('scroll', handleNavVisibility);
         });
     </script>
 </body>
